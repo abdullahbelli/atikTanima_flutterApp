@@ -232,6 +232,9 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                         Navigator.of(context).pop();
                       }
                     },
+                    style: TextButton.styleFrom(
+                      enableFeedback: false,
+                    ),
                     icon: const Icon(Icons.arrow_back, color: Colors.white70),
                     label: const Text(
                       'Geri Dön',
@@ -265,6 +268,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: IconButton(
+                  enableFeedback: false,
                   icon: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -295,6 +299,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: IconButton(
+          enableFeedback: false,
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
