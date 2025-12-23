@@ -20,6 +20,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   bool _isTakingPicture = false;
   bool _isFlashOn = false;
   bool _hasFlash = false;
+  bool _isDisposing = false; // Sayfa kapatılırken flag
 
   @override
   void initState() {
@@ -72,21 +73,23 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   /// Uygulama yaşam döngüsü değişikliklerini dinler
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (!_isCameraInitialized || _controller == null) return;
+    if (_isDisposing || !_isCameraInitialized || _controller == null) return;
 
     // Uygulama arka plana gittiğinde kamerayı serbest bırak
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       await _controller?.dispose();
-      if (!mounted) return;
+      if (!mounted || _isDisposing) return;
       setState(() {
         _controller = null;
         _isCameraInitialized = false;
       });
     } else if (state == AppLifecycleState.resumed) {
       // Uygulama ön plana döndüğünde kamerayı tekrar başlat
-      await _initCamera();
+      if (!_isDisposing && mounted) {
+        await _initCamera();
+      }
     }
   }
 
@@ -179,6 +182,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _isDisposing = true;
     WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
     super.dispose();
@@ -191,58 +195,93 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     // Hata Durumu
     if (_error != null) {
       return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: const Text('Kamera'),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: theme.colorScheme.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _error!,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() => _error = null);
-                    _initCamera();
-                  },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Tekrar Dene'),
-                ),
-              ],
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _error!,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() => _error = null);
+                      _initCamera();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Tekrar Dene'),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton.icon(
+                    onPressed: () {
+                      if (!_isDisposing) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                    label: const Text(
+                      'Geri Dön',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       );
     }
 
-    // Yükleniyor Durumu
+    // Yükleniyor Durumu - Kamera hazır olana kadar overlay göster
     if (!_isCameraInitialized || _controller == null) {
       return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: const Text('Kamera'),
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(),
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            // Siyah arka plan
+            Container(color: Colors.black),
+            // Yükleme göstergesi
+            const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            // Geri butonu
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.arrow_back, color: Colors.white),
+                  ),
+                  onPressed: () {
+                    if (!_isDisposing) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -254,6 +293,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),
@@ -263,7 +303,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
             ),
             child: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (!_isDisposing) {
+              _isDisposing = true;
+              Navigator.of(context).pop();
+            }
+          },
         ),
         actions: [
           // Flash butonu
