@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 
 /// Uygulama tema yapılandırması - Açık ve koyu tema desteği
 class AppTheme {
-  // Ana Renkler - Çevre dostu uygulama için yeşil tema
-  static const Color primaryColor = Color(0xFF2E7D32);
-  static const Color primaryLight = Color(0xFF4CAF50);
-  static const Color primaryDark = Color(0xFF1B5E20);
+  // Ana Renkler - Çevre dostu uygulama için modern yeşil tema
+  static const Color primaryColor = Color(0xFF4CAF50);
+  static const Color primaryLight = Color(0xFF80E27E);
+  static const Color primaryDark = Color(0xFF388E3C);
   static const Color accentColor = Color(0xFF66BB6A);
   
   // Arka Plan Renkleri

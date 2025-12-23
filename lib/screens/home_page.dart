@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  int _selectedIndex = 0;
 
   // Atık kategorileri listesi
   static const _items = <WasteItem>[
@@ -65,21 +66,9 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildHomePage() {
     final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Atık Tanıma',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        centerTitle: true,
-        backgroundColor: theme.colorScheme.primary,
-        elevation: 0,
-      ),
-      body: SafeArea(
+    return SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: CustomScrollView(
@@ -134,7 +123,298 @@ class _HomePageState extends State<HomePage>
             ],
           ),
         ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Atık Tanıma',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: theme.colorScheme.primary,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+            onPressed: () => _showInfoDialog(context),
+          ),
+        ],
       ),
+      body: _selectedIndex == 0
+          ? _buildHomePage()
+          : _selectedIndex == 1
+              ? _buildHistoryPlaceholder()
+              : _buildStatsPlaceholder(),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Ana Sayfa',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.history_outlined),
+            selectedIcon: Icon(Icons.history),
+            label: 'Geçmiş',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: 'İstatistikler',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryPlaceholder() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.history, size: 80, color: Colors.grey.shade400),
+          const SizedBox(height: 16),
+          Text(
+            'Henüz geçmiş yok',
+            style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Fotoğraf çekmeye başlayın',
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsPlaceholder() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.bar_chart, size: 80, color: Colors.grey.shade400),
+          const SizedBox(height: 16),
+          Text(
+            'İstatistikler yakında',
+            style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Verilerinizi analiz ediyoruz',
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showInfoDialog(BuildContext context) {
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        elevation: 8,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.colorScheme.primary,
+                theme.colorScheme.primary.withOpacity(0.8),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header مع أيقونة متحركة
+              Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    // أيقونة دائرية مع رسوم متحركة
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.elasticOut,
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 3,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.eco,
+                              size: 56,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    // العنوان
+                    const Text(
+                      'Hakkında',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // العنوان الفرعي
+                    Text(
+                      'Atık Tanıma Uygulaması',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.9),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // المحتوى الأبيض
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // النص الوصفي
+                    const Text(
+                      'Atık Tanıma uygulaması, çevre dostu bir gelecek için tasarlanmıştır. '
+                      'Fotoğraf çekerek veya galeriden seçerek atık türlerini tanımlayabilir '
+                      've doğru şekilde ayrıştırma hakkında bilgi edinebilirsiniz.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.6,
+                        color: Color(0xFF424242),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // الميزات الرئيسية
+                    _buildFeatureRow(Icons.camera_alt, 'Fotoğraf Çekme', theme),
+                    const SizedBox(height: 12),
+                    _buildFeatureRow(Icons.analytics, 'Akıllı Tanıma', theme),
+                    const SizedBox(height: 12),
+                    _buildFeatureRow(Icons.recycling, 'Geri Dönüşüm İpuçları', theme),
+
+                    const SizedBox(height: 24),
+
+                    // زر الإغلاق
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Tamam',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(Icons.check_circle_outline, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeatureRow(IconData icon, String text, ThemeData theme) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF424242),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

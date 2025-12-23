@@ -19,8 +19,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   String? _error;
   bool _isTakingPicture = false;
   bool _isFlashOn = false;
-  bool _hasFlash = false;
-  bool _isDisposing = false; // Sayfa kapatılırken flag
+  bool _isDisposing = false;
+  double _currentZoom = 1.0;
+  double _minZoom = 1.0;
+  double _maxZoom = 1.0;
+  List<CameraDescription> _cameras = [];
+  int _currentCameraIndex = 0;
 
   @override
   void initState() {
@@ -32,21 +36,25 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   /// Kamerayı başlatır
   Future<void> _initCamera() async {
     try {
-      final cameras = await availableCameras();
-      if (cameras.isEmpty) {
+      _cameras = await availableCameras();
+      if (_cameras.isEmpty) {
         if (!mounted) return;
         setState(() => _error = AppConstants.cameraNotFound);
         return;
       }
 
-      // Arka kamera tercih edilir, yoksa ilk kullanılabilir kamera
-      final camera = cameras.firstWhere(
-        (c) => c.lensDirection == CameraLensDirection.back,
-        orElse: () => cameras.first,
-      );
+      // İlk seferde arka kamerayı tercih et
+      if (_currentCameraIndex == 0) {
+        final backCameraIndex = _cameras.indexWhere(
+          (c) => c.lensDirection == CameraLensDirection.back,
+        );
+        if (backCameraIndex != -1) {
+          _currentCameraIndex = backCameraIndex;
+        }
+      }
 
       final controller = CameraController(
-        camera,
+        _cameras[_currentCameraIndex],
         ResolutionPreset.high,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,
@@ -59,6 +67,11 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         return;
       }
 
+      // Zoom limitlerini al
+      _minZoom = await controller.getMinZoomLevel();
+      _maxZoom = await controller.getMaxZoomLevel();
+      _currentZoom = _minZoom;
+
       setState(() {
         _controller = controller;
         _isCameraInitialized = true;
@@ -67,6 +80,35 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     } catch (e) {
       if (!mounted) return;
       setState(() => _error = '${AppConstants.cameraInitFailed}: $e');
+    }
+  }
+
+  /// Kamera değiştirir (ön/arka)
+  Future<void> _switchCamera() async {
+    if (_cameras.length < 2) return;
+
+    setState(() {
+      _isCameraInitialized = false;
+    });
+
+    await _controller?.dispose();
+
+    _currentCameraIndex = (_currentCameraIndex + 1) % _cameras.length;
+
+    await _initCamera();
+  }
+
+  /// Zoom seviyesini ayarlar
+  Future<void> _setZoom(double zoom) async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    final clampedZoom = zoom.clamp(_minZoom, _maxZoom);
+    await _controller!.setZoomLevel(clampedZoom);
+
+    if (mounted) {
+      setState(() {
+        _currentZoom = clampedZoom;
+      });
     }
   }
 
@@ -170,13 +212,9 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       if (!mounted) return;
       setState(() {
         _isFlashOn = !_isFlashOn;
-        _hasFlash = true; // Flash modu ayarlanabiliyorsa flash mevcut
       });
     } catch (e) {
-      // Bu cihazda flash mevcut değil
-      if (mounted) {
-        setState(() => _hasFlash = false);
-      }
+      // Bu cihazda flash mevcut değil - hata gösterme
     }
   }
 
@@ -316,6 +354,19 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
           },
         ),
         actions: [
+          // Kamera değiştir butonu
+          if (_cameras.length > 1)
+            IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.flip_camera_ios, color: Colors.white),
+              ),
+              onPressed: _switchCamera,
+            ),
           // Flash butonu
           IconButton(
             icon: Container(
@@ -339,6 +390,53 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
           Positioned.fill(
             child: CameraPreview(_controller!),
           ),
+
+          // Zoom Kontrolü
+          if (_maxZoom > _minZoom)
+            Positioned(
+              right: 16,
+              top: 100,
+              bottom: 200,
+              child: Container(
+                width: 48,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add, color: Colors.white),
+                      onPressed: () {
+                        final newZoom = (_currentZoom + 0.5).clamp(_minZoom, _maxZoom);
+                        _setZoom(newZoom);
+                      },
+                    ),
+                    Expanded(
+                      child: RotatedBox(
+                        quarterTurns: 3,
+                        child: Slider(
+                          value: _currentZoom,
+                          min: _minZoom,
+                          max: _maxZoom,
+                          onChanged: _setZoom,
+                          activeColor: Colors.white,
+                          inactiveColor: Colors.white30,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.remove, color: Colors.white),
+                      onPressed: () {
+                        final newZoom = (_currentZoom - 0.5).clamp(_minZoom, _maxZoom);
+                        _setZoom(newZoom);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
           // Alt Kontroller
           Positioned(

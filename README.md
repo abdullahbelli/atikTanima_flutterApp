@@ -4,19 +4,34 @@ Modern Flutter uygulaması ile atık tanıma ve sınıflandırma. Bu uygulama, k
 
 ## 🌟 Özellikler
 
+### Ana Özellikler
 - **Modern UI/UX**: Material Design 3 ile güzel ve akıcı animasyonlu arayüz
-- **Kamera Entegrasyonu**: Uygulama içinden doğrudan fotoğraf çekme
+- **Bottom Navigation**: Ana sayfa, Geçmiş ve İstatistikler arasında kolay gezinme
+- **Gelişmiş Kamera Özellikleri**:
+  - Zoom desteği (+ ve - butonları ile)
+  - Ön/Arka kamera değiştirme
+  - Flash kontrolü (Otomatik/Kapalı)
+  - Yüksek kalite fotoğraf çekimi
 - **Galeri Desteği**: Cihaz galerisinden görüntü seçme
-- **Atık Kategorileri**: 
-  - Cam (Glass)
-  - Kağıt (Paper)
-  - Metal (Metal)
-  - Organik (Organic)
-  - Plastik (Plastic)
+- **Atık Kategorileri**:
+  - 🍾 Cam (Glass)
+  - 📄 Kağıt (Paper)
+  - 🥫 Metal (Metal)
+  - 🍃 Organik (Organic)
+  - ♻️ Plastik (Plastic)
+
+### Gelişmiş Tanıma Özellikleri
+- **Detaylı Sonuçlar**: Tanıma sonrası kapsamlı bilgi kartı
+- **Güven Skoru**: Tanıma doğruluğu yüzdesi
+- **Geri Dönüşüm Tavsiyeleri**: Her atık türü için özel tavsiyeler
+- **Görsel Geri Bildirim**: Renkli kartlar ve ikonlar
+
+### Diğer Özellikler
 - **Koyu Mod Desteği**: Sistem tercihlerine göre otomatik tema değişimi
 - **Akıcı Animasyonlar**: Uygulama genelinde profesyonel geçişler ve animasyonlar
 - **Lottie Animasyonları**: Başarı durumları için görsel animasyonlar
 - **Hata Yönetimi**: Kapsamlı hata yönetimi ve kullanıcı dostu mesajlar
+- **Modern Renk Paleti**: Çevre dostu yeşil tema ile göz alıcı tasarım
 
 ## 📱 Ekran Görüntüleri
 
@@ -100,19 +115,24 @@ Uygulama hem açık hem de koyu temaları destekler ve sistem tercihlerine göre
 3. `lib/ui/` içinde UI bileşenleri oluşturun
 4. Gerekirse `lib/core/theme/` içinde temayı güncelleyin
 
-## 🐛 Bilinen Sorunlar
+## ✅ Son Güncellemeler (v1.0.0)
 
-- Atık tanıma özelliği geliştirilmektedir
-- Kamera yaşam döngüsü yönetiminde bazı kenar durumlar
+### Yeni Eklenen Özellikler
+- ✨ **Gelişmiş Kamera Kontrolleri**: Zoom, kamera değiştirme ve flash özellikleri eklendi
+- 🎨 **Yenilenmiş UI**: Modern ve renkli arayüz tasarımı
+- 📊 **Detaylı Sonuçlar**: Güven skoru ve geri dönüşüm tavsiyeleri
+- 🧭 **Bottom Navigation**: Geçmiş ve İstatistikler sayfaları için hazırlık
+- 🎯 **Hata Düzeltmeleri**: Kod optimizasyonu ve performans iyileştirmeleri
 
 ## 🔮 Gelecek Geliştirmeler
 
-- [ ] ML tabanlı atık tanıma
-- [ ] Taranan öğelerin geçmişi
-- [ ] İstatistikler ve analitikler
-- [ ] Çoklu dil desteği
-- [ ] Bulut senkronizasyonu
+- [ ] ML tabanlı gerçek atık tanıma (şu anda simülasyon modu)
+- [ ] Taranan öğelerin geçmişini kaydetme ve görüntüleme
+- [ ] İstatistikler ve analitikler sayfası
+- [ ] Çoklu dil desteği (İngilizce, Türkçe, Arapça)
+- [ ] Bulut senkronizasyonu ve veri yedekleme
 - [ ] Sosyal paylaşım özellikleri
+- [ ] Çevrimdışı mod desteği
 
 ## 📄 Lisans
 
