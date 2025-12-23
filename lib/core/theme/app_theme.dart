@@ -10,7 +10,7 @@ class AppTheme {
   static const Color accentColor = Color(0xFF66BB6A);
   
   // Arka Plan Renkleri
-  static const Color backgroundColor = Color(0xFFF5F5F5);
+  static const Color backgroundColor = Colors.white;
   static const Color surfaceColor = Colors.white;
   
   // Metin Renkleri

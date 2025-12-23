@@ -146,35 +146,51 @@ class _HomePageState extends State<HomePage>
           ),
         ],
       ),
+      backgroundColor: Colors.white,
       body: _selectedIndex == 0
           ? _buildHomePage()
           : _selectedIndex == 1
               ? _buildHistoryPlaceholder()
               : _buildStatsPlaceholder(),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Ana Sayfa',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'Geçmiş',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: 'İstatistikler',
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: NavigationBar(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          indicatorColor: theme.colorScheme.primary.withOpacity(0.2),
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (int index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          destinations: [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined, color: Colors.grey.shade600),
+              selectedIcon: Icon(Icons.home, color: theme.colorScheme.primary),
+              label: 'Ana Sayfa',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.history_outlined, color: Colors.grey.shade600),
+              selectedIcon: Icon(Icons.history, color: theme.colorScheme.primary),
+              label: 'Geçmiş',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.bar_chart_outlined, color: Colors.grey.shade600),
+              selectedIcon: Icon(Icons.bar_chart, color: theme.colorScheme.primary),
+              label: 'İstatistikler',
+            ),
+          ],
+        ),
       ),
     );
   }

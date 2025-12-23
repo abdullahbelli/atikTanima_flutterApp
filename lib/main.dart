@@ -26,8 +26,7 @@ class AtikTanimaApp extends StatelessWidget {
       title: 'Atık Tanıma',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system, // Sistem temasını takip et
+      themeMode: ThemeMode.light, // Her zaman açık tema kullan
       home: const HomePage(),
     );
   }
